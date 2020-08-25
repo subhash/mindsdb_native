@@ -33,10 +33,18 @@ def test_postgres_ds():
 
     postgres_ds = PostgresDS(table='test_mindsdb', host=HOST, user=USER,
                           password=PASSWORD, database=DBNAME, port=PORT)
-                        
+
     assert postgres_ds.name() == 'PostgresDS: postgres/test_mindsdb'
 
     assert (len(postgres_ds._df) == 200)
+
+    conditions =[('col_3', '=', 'false'), ('col_1', 'LIKE', '%9%'), ('col_2', '>', 10)]
+    filtered_ds = postgres_ds.filter(conditions)
+    assert (len(filtered_ds._df) == 27)
+    limited_ds = postgres_ds.filter(where=conditions, limit=10)
+    assert (len(limited_ds._df) == 10)
+
+
 
     mdb = Predictor(name='analyse_dataset_test_predictor', log_level=logging.ERROR)
     F.analyse_dataset(from_data=postgres_ds)
